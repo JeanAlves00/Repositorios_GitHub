@@ -9,10 +9,12 @@ const ReposList = ({ nomeUsuario }) => {
     const [readmeContent, setReadmeContent] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [readmeNotFound, setReadmeNotFound] = useState(false);
+    const [erro, setErro] = useState(null); // Adiciona o estado para armazenar erros
 
     useEffect(() => {
         const fetchRepos = async () => {
             setEstaCarregando(true);
+            setErro(null);
             try {
                 const res = await fetch(`https://api.github.com/users/${nomeUsuario}/repos`);
                 if (!res.ok) {
@@ -22,6 +24,7 @@ const ReposList = ({ nomeUsuario }) => {
                 setRepos(resJson);
             } catch (error) {
                 console.error(error);
+                setErro('Erro ao carregar repositórios');
             } finally {
                 setEstaCarregando(false);
             }
@@ -31,6 +34,7 @@ const ReposList = ({ nomeUsuario }) => {
     }, [nomeUsuario]);
 
     const fetchReadme = async (repoName) => {
+        setErro(null);
         try {
             const res = await fetch(`https://api.github.com/repos/${nomeUsuario}/${repoName}/readme`, {
                 headers: {
@@ -52,10 +56,16 @@ const ReposList = ({ nomeUsuario }) => {
     };
 
     return (
-        <>
+        <div>
             {estaCarregando && (
-                <div className={styles.loadingContainer}>
-                    <img src="/loading-7528_128.gif" alt="loading" className={styles.loadingImage} />
+                <div className={styles.loadingContainer} aria-live="polite">
+                    <img src="/loading-7528_128.gif" alt="Carregando..." className={styles.loadingImage} />
+                </div>
+            )}
+
+            {erro && (
+                <div className={styles.errorMessage}>
+                    <p>{erro}</p>
                 </div>
             )}
 
@@ -85,7 +95,7 @@ const ReposList = ({ nomeUsuario }) => {
                     <div className={styles.modalContent}>
                         <h2>README.md</h2>
                         {readmeNotFound ? (
-                            <p>Arquivo README.md não encontrado</p>
+                            <p>Arquivo README não encontrado</p>
                         ) : (
                             <ReactMarkdown rehypePlugins={[rehypeRaw]}>
                                 {readmeContent}
@@ -97,7 +107,7 @@ const ReposList = ({ nomeUsuario }) => {
                     </div>
                 </div>
             )}
-        </>
+        </div>
     );
 }
 
