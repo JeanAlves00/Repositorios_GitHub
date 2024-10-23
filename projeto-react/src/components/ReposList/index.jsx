@@ -9,7 +9,7 @@ const ReposList = ({ nomeUsuario }) => {
     const [readmeContent, setReadmeContent] = useState(null);
     const [showModal, setShowModal] = useState(false);
     const [readmeNotFound, setReadmeNotFound] = useState(false);
-    const [erro, setErro] = useState(null); // Adiciona o estado para armazenar erros
+    const [erro, setErro] = useState(null); // Estado para erros
 
     useEffect(() => {
         const fetchRepos = async () => {
@@ -17,6 +17,9 @@ const ReposList = ({ nomeUsuario }) => {
             setErro(null);
             try {
                 const res = await fetch(`https://api.github.com/users/${nomeUsuario}/repos`);
+                if (res.status === 404) {
+                    throw new Error('Usuário não encontrado');
+                }
                 if (!res.ok) {
                     throw new Error('Erro ao carregar repositórios');
                 }
@@ -24,7 +27,7 @@ const ReposList = ({ nomeUsuario }) => {
                 setRepos(resJson);
             } catch (error) {
                 console.error(error);
-                setErro('Erro ao carregar repositórios');
+                setErro(error.message); // Define a mensagem de erro com base no erro capturado
             } finally {
                 setEstaCarregando(false);
             }
@@ -69,7 +72,7 @@ const ReposList = ({ nomeUsuario }) => {
                 </div>
             )}
 
-            {!estaCarregando && repos.length > 0 && (
+            {!estaCarregando && repos.length > 0 && !erro && (
                 <ul className={styles.list}>
                     {repos.map(({ id, name, language, html_url }) => (
                         <li className={styles.listItem} key={id}>
