@@ -3,7 +3,8 @@ import { useState } from "react";
 import Perfil from "./components/Perfil";
 import ReposList from "./components/ReposList";
 
-import styles from './App.module.css';
+import styles from './app.module.css';
+
 
 function App() {
   const [nomeUsuario, setNomeUsuario] = useState('');
